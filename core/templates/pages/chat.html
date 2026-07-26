@@ -1,0 +1,120 @@
+{% extends 'base.html' %} {% block content %}
+
+<!-- Header -->
+<div class="h-full flex flex-col">
+  <div class="flex items-center justify-between px-4 py-4 border-b bg-white">
+    <div class="flex items-center gap-5 text-xl">
+      <button>
+        <i class="fa-solid fa-user-group text-yellow-400"></i>
+      </button>
+
+      <a href="{% url 'search-users' %}">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </a>
+    </div>
+
+    <h1 class="text-xl font-semibold">Chat</h1>
+
+    <div class="flex items-center gap-5 text-xl">
+      <button>
+        <i class="fa-regular fa-bell"></i>
+      </button>
+
+      <button
+        class="w-8 h-8 rounded-full bg-yellow-300 flex items-center justify-center"
+      >
+        <i class="fa-solid fa-user-plus text-black text-sm"></i>
+      </button>
+
+      <button>
+        <i class="fa-solid fa-ellipsis"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat List -->
+  <div class="flex-1 overflow-y-auto">
+    <div
+      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
+        >
+          <img
+            src="https://i.pravatar.cc/150?img=11"
+            class="w-14 h-14 rounded-full border-2 border-white"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-bold text-lg">Akshat</h2>
+
+          <p class="flex items-center gap-1 text-sm text-gray-400">
+            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
+
+            Received • 1m
+          </p>
+        </div>
+      </div>
+
+      <button class="text-gray-500">
+        <i class="fa-solid fa-camera text-xl"></i>
+      </button>
+    </div>
+    <div
+      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
+        >
+          <img
+            src="https://i.pravatar.cc/150?img=11"
+            class="w-14 h-14 rounded-full border-2 border-white"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-bold text-lg">Anuj</h2>
+
+          <p class="flex items-center gap-1 text-sm text-gray-400">
+            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
+
+            Received • 1m
+          </p>
+        </div>
+      </div>
+
+      <button class="text-gray-500">
+        <i class="fa-solid fa-camera text-xl"></i>
+      </button>
+    </div>
+  </div>
+  <!-- Bottom Navigation -->
+  <div class="border-t bg-black">
+    <div class="flex justify-around py-3">
+      <button class="flex flex-col items-center text-gray-500 hover:text-white">
+        <i class="fa-solid fa-location-dot text-xl"></i>
+        <span class="text-xs">Map</span>
+      </button>
+
+      <button class="flex flex-col items-center text-white">
+        <i class="fa-solid fa-message text-xl"></i>
+        <span class="text-xs font-semibold">Chat</span>
+      </button>
+
+      <button class="flex flex-col items-center text-gray-500 hover:text-white">
+        <i class="fa-solid fa-camera text-xl"></i>
+        <span class="text-xs">Camera</span>
+      </button>
+
+      <button class="flex flex-col items-center text-gray-500 hover:text-white">
+        <i class="fa-solid fa-user-group text-xl"></i>
+        <span class="text-xs">Stories</span>
+      </button>
+    </div>
+  </div>
+
+  {% endblock %}
+</div>

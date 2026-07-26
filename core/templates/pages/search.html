@@ -1,0 +1,94 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="flex items-center gap-3 p-4 cursor-pointer">
+  <a href="{% url 'home' %}" class="text-xl text-gray-700">
+    <i class="fa-solid fa-chevron-down"></i>
+  </a>
+  <form action="{% url 'search-users' %}" method="GET">
+    <label
+      class="input input-bordered flex-1 rounded-full bg-gray-100 border-none shadow-none"
+    >
+      <i class="fa-solid fa-magnifying-glass"></i>
+
+      <input
+        type="search"
+        required
+        placeholder="Search"
+        name="q"
+        class="grow"
+      />
+    </label>
+  </form>
+</div>
+<main class="overflow-y-auto">
+  <div class="flex-1 overflow-y-auto">
+    
+    {% for user  in users  %}
+        
+  
+        
+    <div
+      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
+        >
+          <img
+            src="https://i.pravatar.cc/150?img=11"
+            class="w-14 h-14 rounded-full border-2 border-white"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-bold text-lg">{{user.username}}</h2>
+
+          <p class="flex items-center gap-1 text-sm text-gray-400">
+            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
+
+            Received • 1m
+          </p>
+        </div>
+      </div>
+      <button
+        class="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-semibold px-2.5 py-1 rounded-full transition"
+      >
+        <i class="fa-solid fa-user-plus text-[10px]"></i>
+        <span>Add</span>
+      </button>
+    </div>
+      {% endfor %}
+    {% comment %} <div
+      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
+        >
+          <img
+            src="https://i.pravatar.cc/150?img=11"
+            class="w-14 h-14 rounded-full border-2 border-white"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-bold text-lg">Anuj</h2>
+
+          <p class="flex items-center gap-1 text-sm text-gray-400">
+            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
+
+            Received • 1m
+          </p>
+        </div>
+      </div>
+      <button
+        class="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-semibold px-2.5 py-1 rounded-full transition"
+      >
+        <i class="fa-solid fa-user-plus text-[10px]"></i>
+        <span>Add</span>
+      </button>
+    </div>
+  </div> {% endcomment %}
+</main>
+
+{% endblock %}

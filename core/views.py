@@ -37,9 +37,18 @@ def login_view(request):
         return redirect("home")
     return render(request, "accounts/login.html", {"form": form})
 
+
 def logout_view(request):
     logout(request)
     return redirect("login")
 
+
 def home(request):
-    return render(request,'chat.html')
+    return render(request, "pages/chat.html")
+
+
+def search_view(request):
+    User = get_user_model()
+    query = request.GET.get("q","")
+    users = User.objects.filter(username__icontains=query)
+    return render(request, "pages/search.html", {"users": users})
