@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import login, logout, get_user_model
 
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 # from django.db.models import Q
 # from .models import  Message
 from . import forms
@@ -46,9 +46,9 @@ def logout_view(request):
 def home(request):
     return render(request, "pages/chat.html")
 
-
+@login_required
 def search_view(request):
     User = get_user_model()
     query = request.GET.get("q","")
-    users = User.objects.filter(username__icontains=query)
+    users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
     return render(request, "pages/search.html", {"users": users})
