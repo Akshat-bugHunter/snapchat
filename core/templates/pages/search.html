@@ -48,13 +48,18 @@
           </p>
         </div>
       </div>
+      
+      {% if  user.id not in friends %}
+        
+      
+        
       <button
         class="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-semibold px-2.5 py-1 rounded-full transition"
       >
         <i class="fa-solid fa-user-plus text-[10px]"></i>
         <span>Add</span>
       </button>
-      
+      {% endif %}
     </div>
     {% endfor %} 
    
