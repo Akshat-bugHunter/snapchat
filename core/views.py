@@ -8,7 +8,7 @@ from django.db.models import Q
 from .models import Message, FriendRequest
 from . import forms
 
-# from django.db import IntegrityError
+from django.db import IntegrityError
 
 
 # Create your views here.
@@ -80,3 +80,17 @@ def search_view(request):
         "pages/search.html",
         {"users": users, "friends": unique_friends, "sent": sent, "received": received},
     )
+
+
+@require_http_methods(["POST"])
+@login_required
+def send_invite(request,id):
+    if id==request.user.id:
+        return redirect("search-users")
+    to_user=get_object_or_404(get_user_model(),id=id)
+
+    try:
+        FriendRequest.objects.create(from_user=request.user,to_user=to_user)
+    except IntegrityError:
+        return redirect("search-users")
+    return redirect("search-users")

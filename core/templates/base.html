@@ -1,4 +1,4 @@
-<!doctype html>
+{% comment %} <!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -13,7 +13,7 @@
         href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css"
         rel="stylesheet"
     />
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
 
 <link
   href="https://cdn.jsdelivr.net/npm/daisyui@5"
@@ -36,13 +36,81 @@
         }
     </style>
 </head>
-</head>
+
 
 <body class="bg-gray-900">
     <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="relative w-[390px] h-[700px] bg-white rounded-3xl overflow-hidden shadow-2xl">
+       <div class="relative w-[390px] h-[700px] rounded-3xl overflow-hidden shadow-2xl">
             {% block content %}
             {% endblock %}
+        </div>
+    </div>
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Snapchat Clone{% endblock %}</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- DaisyUI -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+        }
+    </style>
+
+</head>
+
+{% comment %} <body class="bg-gray-900">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+
+        <div class="w-[390px] h-[700px] bg-white rounded-3xl overflow-hidden shadow-2xl">
+
+            {% block content %}
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+</body> {% endcomment %}
+<body class="h-full overflow-hidden font-sans">
+    <div class="h-dvh overflow-hidden bg-white sm:bg-neutral-950 flex justify-center items-center sm:p-6">
+        <div
+            class="relative w-full h-full overflow-hidden bg-white sm:w-auto sm:h-[min(812px,calc(100dvh-3rem))] sm:aspect-[400/845] sm:border-[6px] sm:border-neutral-800 sm:rounded-[1.75rem]">
+            <div class="relative w-full h-full overflow-hidden sm:rounded-[1.35rem]">
+                {% block content %}
+                {% endblock %}
+            </div>
         </div>
     </div>
 </body>

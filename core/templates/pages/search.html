@@ -1,67 +1,136 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
 
-<div class="flex items-center gap-3 p-4 cursor-pointer">
-  <a href="{% url 'home' %}" class="text-xl text-gray-700">
-    <i class="fa-solid fa-chevron-down"></i>
-  </a>
-  <form action="{% url 'search-users' %}" method="GET">
-    <label
-      class="input input-bordered flex-1 rounded-full bg-gray-100 border-none shadow-none"
-    >
-      <i class="fa-solid fa-magnifying-glass"></i>
+{% block title %}Search{% endblock %}
 
-      <input
-        type="search"
-        required
-        placeholder="Search"
-        name="q"
-        class="grow"
-      />
-    </label>
-  </form>
-</div>
-<main class="overflow-y-auto">
-  <div class="flex-1 overflow-y-auto">
-    {% for user in users %}
+{% block content %}
 
-    <div
-      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
-    >
-      <div class="flex items-center gap-3">
-        <div
-          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
-        >
-          <img
-            src="https://i.pravatar.cc/150?img=11"
-            class="w-14 h-14 rounded-full border-2 border-white"
-          />
-        </div>
+<div class="h-full flex flex-col bg-white">
 
-        <div>
-          <h2 class="font-bold text-lg">{{user.username}}</h2>
-       
+    <!-- Header -->
+    <div class="absolute top-0 left-0 right-0 z-20 px-3 py-3 bg-white border-b border-neutral-100 flex items-center gap-3">
 
-          <p class="flex items-center gap-1 text-sm text-gray-400">
-            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
+        <a href="{% url 'home' %}"
+           class="size-8 flex items-center justify-center rounded-full hover:bg-neutral-100">
+            <i class="fa-solid fa-chevron-down text-black"></i>
+        </a>
 
-            Received • 1m
-          </p>
-        </div>
-      </div>
-      
-      {% if  user.id not in friends %}
-        
-      
-        
-      <button
-        class="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-semibold px-2.5 py-1 rounded-full transition"
-      >
-        <i class="fa-solid fa-user-plus text-[10px]"></i>
-        <span>Add</span>
-      </button>
-      {% endif %}
+        <form action="{% url 'search-users' %}" method="GET" class="flex-1">
+
+            <label class="flex items-center gap-2 h-10 px-3 rounded-full bg-neutral-100">
+
+                <i class="fa-solid fa-magnifying-glass text-neutral-400 text-sm"></i>
+
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ request.GET.q }}"
+                    placeholder="Search"
+                    class="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-neutral-400"
+                >
+
+            </label>
+
+        </form>
+
     </div>
-    {% endfor %} 
-   
- </main> 
+
+    <!-- Users -->
+    <main class="mt-[64px] px-3 pb-8 overflow-y-auto">
+
+        <ul class="space-y-1">
+
+            {% for user in users %}
+
+            <li class="flex items-center justify-between px-2 py-3 rounded-xl hover:bg-neutral-50">
+
+                <div class="flex items-center gap-3 min-w-0">
+
+                    <div class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400">
+
+                        <img
+                            src="https://i.pravatar.cc/150?img=11"
+                            alt="{{ user.username }}"
+                            class="w-14 h-14 rounded-full border-2 border-white"
+                        >
+
+                    </div>
+
+                    <div class="min-w-0">
+
+                        <h2 class="font-semibold text-lg truncate">
+                            {{ user.username }}
+                        </h2>
+
+                        <p class="text-sm text-gray-400">
+                            @{{ user.username }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="shrink-0">
+
+                    {% if user.id not in friends %}
+
+                    <form action="{% url 'send-invite' user.id %}" method="POST">
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="min-w-[90px] flex items-center justify-center gap-2 bg-[#FFFC00] hover:bg-yellow-300 text-black text-sm font-semibold px-4 py-2 rounded-full transition">
+
+                            <i class="fa-solid fa-user-plus text-xs"></i>
+
+                            <span>Add</span>
+
+                        </button>
+
+                    </form>
+
+                    {% else %}
+
+                    <button
+                        type="button"
+                        disabled
+                        class="min-w-[90px] flex items-center justify-center gap-2 bg-neutral-200 text-neutral-600 text-sm font-semibold px-4 py-2 rounded-full cursor-not-allowed">
+
+                        <i class="fa-regular fa-clock text-xs"></i>
+
+                        <span>Pending</span>
+
+                    </button>
+
+                    {% endif %}
+
+                </div>
+
+            </li>
+
+            {% empty %}
+
+            <div class="flex flex-col items-center pt-20 text-center px-8">
+
+                <div class="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-magnifying-glass text-neutral-400"></i>
+                </div>
+
+                <p class="font-semibold text-lg">
+                    Find your friends
+                </p>
+
+                <p class="text-sm text-neutral-500 mt-1">
+                    Search by username to send an invite
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        </ul>
+
+    </main>
+
+</div>
+
 {% endblock %}
