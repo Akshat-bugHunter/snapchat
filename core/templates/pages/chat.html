@@ -33,7 +33,10 @@
   </div>
 
   <!-- Chat List -->
-  <div class="flex-1 overflow-y-auto">
+ <div class="flex-1 overflow-y-auto">
+  {% for friend in friends %}
+
+  <a href="{% url 'chat-details' friend.id  %}">
     <div
       class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
     >
@@ -48,7 +51,7 @@
         </div>
 
         <div>
-          <h2 class="font-bold text-lg">Akshat</h2>
+          <h2 class="font-bold text-lg">{{ friend.username }}</h2>
 
           <p class="flex items-center gap-1 text-sm text-gray-400">
             <i class="fa-regular fa-message text-blue-500 text-xs"></i>
@@ -62,38 +65,13 @@
         <i class="fa-solid fa-camera text-xl"></i>
       </button>
     </div>
-    <div
-      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
-    >
-      <div class="flex items-center gap-3">
-        <div
-          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
-        >
-          <img
-            src="https://i.pravatar.cc/150?img=11"
-            class="w-14 h-14 rounded-full border-2 border-white"
-          />
-        </div>
-
-        <div>
-          <h2 class="font-bold text-lg">Anuj</h2>
-
-          <p class="flex items-center gap-1 text-sm text-gray-400">
-            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
-
-            Received • 1m
-          </p>
-        </div>
-      </div>
-
-      <button class="text-gray-500">
-        <i class="fa-solid fa-camera text-xl"></i>
-      </button>
-    </div>
-  </div>
+  </a>
+  {% endfor %}
+</div>
+  
   <!-- Bottom Navigation -->
   <div class="border-t bg-black">
-    <div class="flex justify-around py-3">
+    <div class="flex justify-around py-3 ">
       <button class="flex flex-col items-center text-gray-500 hover:text-white">
         <i class="fa-solid fa-location-dot text-xl"></i>
         <span class="text-xs">Map</span>
@@ -115,6 +93,5 @@
       </button>
     </div>
   </div>
-
-  {% endblock %}
 </div>
+{% endblock %}

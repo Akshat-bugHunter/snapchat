@@ -1,0 +1,32 @@
+{% extends 'base.html' %} {% block title %}Search{% endblock %} 
+{% block content %}
+
+<div class="h-full flex flex-col bg-white">
+  <!-- Header -->
+  <div
+    class="sticky top-0 z-20 h-20 bg-white border-b flex items-center px-4"
+  >
+    <a
+      href="{% url 'home' %}"
+      class="size-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+    >
+      <i class="fa-solid fa-chevron-left text-black"></i>
+    </a>
+
+        <div
+          class="flex items-center gap-3 ml-4"
+        >
+          <img
+            src="https://i.pravatar.cc/150?img=11"
+            class="w-12 h-12 rounded-full object-cover"
+          />
+          <span class="text-lg font-medium">{{friend.username}}</span>
+        </div>
+  </div>
+
+ 
+
+
+</div>
+
+{% endblock %}

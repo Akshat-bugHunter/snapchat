@@ -10,7 +10,6 @@ from . import forms
 
 from django.db import IntegrityError
 
-
 # Create your views here.
 
 
@@ -45,7 +44,23 @@ def logout_view(request):
 
 
 def home(request):
-    return render(request, "pages/chat.html")
+    queryset = FriendRequest.objects.filter(
+        Q(from_user=request.user) | Q(to_user=request.user)
+    )
+    friend_requests = queryset.filter(status=FriendRequest.StatusChoice.ACCEPTED)
+    friends = []
+    for friend in friend_requests:
+        if request.user == friend.from_user:
+            friends.append(friend.to_user)
+        else:
+            friends.append(friend.from_user)
+    return render(request, "pages/chat.html", {"friends": friends})
+
+
+def chat_details_view(request, id):
+    friend=get_object_or_404(get_user_model(),pk=id)
+
+    return render(request, "pages/chat-details.html",{"friend":friend})
 
 
 @login_required
@@ -84,13 +99,13 @@ def search_view(request):
 
 @require_http_methods(["POST"])
 @login_required
-def send_invite(request,id):
-    if id==request.user.id:
+def send_invite(request, id):
+    if id == request.user.id:
         return redirect("search-users")
-    to_user=get_object_or_404(get_user_model(),id=id)
+    to_user = get_object_or_404(get_user_model(), id=id)
 
     try:
-        FriendRequest.objects.create(from_user=request.user,to_user=to_user)
+        FriendRequest.objects.create(from_user=request.user, to_user=to_user)
     except IntegrityError:
         return redirect("search-users")
     return redirect("search-users")
