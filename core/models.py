@@ -37,6 +37,7 @@ class Message(models.Model):
     )
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    image=models.ImageField(upload_to='snaps',null=True,blank=True)
 
     def __str__(self):
         return f"Message {self.sender} -> {self.receiver}"

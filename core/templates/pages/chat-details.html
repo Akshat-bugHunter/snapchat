@@ -1,9 +1,11 @@
-{% extends 'base.html' %} {% block title %}Search{% endblock %} {% block content %}
+{% extends 'base.html' %} 
+{% load humanize %}
 
+{% block title %}Chat with {{ friend.username }}{% endblock %} 
 
+{% block content %}
 <div class="h-full flex flex-col bg-white">
   <!-- Header -->
-
   <div class="sticky top-0 z-20 h-20 bg-white border-b flex items-center px-4">
     <a
       href="{% url 'home' %}"
@@ -16,72 +18,127 @@
       <img
         src="https://i.pravatar.cc/150?img=11"
         class="w-12 h-12 rounded-full object-cover"
+        alt="{{ friend.username }}"
       />
-      <span class="text-lg font-medium">{{friend.username}}</span>
+      <span class="text-lg font-medium">{{ friend.username }}</span>
     </div>
 
-    <div class="flex flex-row ml-auto gap-4">
-      <i class="fa-solid fa-phone"></i>
-      <i class="fa-solid fa-video"></i>
+    <div class="flex flex-row ml-auto gap-4 text-gray-600">
+      <button type="button"><i class="fa-solid fa-phone"></i></button>
+      <button type="button"><i class="fa-solid fa-video"></i></button>
     </div>
   </div>
 
+  <!-- Chat Messages -->
   <main
     class="flex-1 overflow-y-auto px-4 py-4 left-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
   >
     <div class="flex flex-col justify-end min-h-full space-y-3">
-      {% for message in messages %} {% if message.sender == request.user %}
-      <div class="chat chat-end">
-        <div class="chat-header text-xs text-gray-400 mb-1">
-          {{message.sender}} {% load humanize %}
-          <time class="text-xs opacity-50">
-            {{ message.created_at|naturaltime }}</time
-          >
-        </div>
+      {% for message in messages %} 
+        {% if message.sender == request.user %}
+          
+          <!-- Outgoing Message (Sender) -->
+          <div class="chat chat-end flex flex-col items-end">
+            <!-- 1. Header is placed on TOP -->
+            <div class="chat-header text-xs text-gray-400 mb-1">
+              {{ message.sender }} 
+              <time class="text-xs opacity-50">{{ message.created_at|naturaltime }}</time>
+            </div>
 
-        <div class="chat-bubble bg-blue-600 text-white">{{message.text}}</div>
+            <!-- 2. Image goes BELOW Header -->
+            {% if message.image %}
+              <div class="mb-1">
+                <img 
+                  src="{{ message.image.url }}" 
+                  class="w-30 h-40 max-w-full  rounded-2xl shadow-sm" 
+                  alt="{{ message.image.name }}" 
+                />
+              </div>
+            {% endif %}
 
-        <div class="chat-footer text-[10px] opacity-50 mt-1">Seen</div>
-      </div>
-      {% else %}
-      <div class="chat chat-start">
-        <div class="chat-header">
-          {{message.sender}} {% load humanize %}
-          <time class="text-xs opacity-50">
-            {{ message.created_at|naturaltime }}</time
-          >
-        </div>
+            <!-- 3. Text Bubble ONLY for Text -->
+            {% if message.text %}
+              <div class="chat-bubble bg-blue-600 text-white">
+                <p>{{ message.text }}</p>
+              </div>
+            {% endif %}
+          </div>
 
-        <div class="chat-bubble">{{message.text}}</div>
+        {% else %}
 
-        <div class="chat-footer opacity-50">Seen</div>
-      </div>
-      {% endif %} {% endfor %}
+          <!-- Incoming Message -->
+          <div class="chat chat-start flex flex-col items-start">
+            <!-- 1. Header is placed on TOP -->
+            <div class="chat-header text-xs text-gray-400 mb-1">
+              {{ message.sender }} 
+              <time class="text-xs opacity-50">{{ message.created_at|naturaltime }}</time>
+            </div>
+
+            <!-- 2. Image goes BELOW Header -->
+            {% if message.image %}
+              <div class="mb-1">
+                <img 
+                  src="{{ message.image.url }}" 
+                  class="w-33 h-40 max-w-full object-cover rounded-2xl shadow-sm" 
+                  alt="Uploaded photo" 
+                />
+              </div>
+            {% endif %}
+
+            <!-- 3. Text Bubble ONLY for Text -->
+            {% if message.text %}
+              <div class="chat-bubble bg-gray-200 text-black">
+                <p>{{ message.text }}</p>
+              </div>
+            {% endif %}
+          </div>
+
+        {% endif %} 
+      {% endfor %}
     </div>
   </main>
 
-  <form action="{% url 'send-message' friend.id %}"
+  <!-- Input Form -->
+  <form 
+    action="{% url 'send-message' friend.id %}"
     method="POST"
-    class="sticky bottom-0 bg-white border-t border-gray-200 px-3 py-2"
+    enctype="multipart/form-data"
+    class="sticky bottom-0 bg-white border-t border-gray-200 px-3 py-2 flex flex-col gap-2"
   >
     {% csrf_token %}
+    
+    <!-- Image Preview Container -->
+    <div id="preview-container" class="hidden relative w-16 h-16 border rounded-lg overflow-hidden group">
+      <img id="preview" alt="Preview" class="w-full h-full object-cover" />
+      <button 
+        id="removeImage"
+        type="button" 
+        class="absolute top-1 right-1 bg-black/60 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hover:bg-black"
+      >
+        ✕
+      </button>
+    </div>
+
     <div class="flex items-center gap-2">
-      <button type="submit" class="text-2xl text-gray-600">
+      <button id="file-btn" type="button" class="text-2xl text-gray-600 hover:text-blue-500 transition-colors">
         <i class="fa-solid fa-camera"></i>
       </button>
+
+      <input id="snap-file" type="file" name="image" accept="image/*" class="hidden" />
 
       <input
         type="text"
         name="message"
         placeholder="Chat"
-        class="flex-1 h-9 bg-gray-100 rounded-full px-4 outline-none text-sm"
+        class="flex-1 h-9 bg-gray-100 rounded-full px-4 outline-none text-sm focus:ring-1 focus:ring-blue-400"
       />
 
-      <button type="submit" class="w-8 h-8 rounded-full bg-blue-500 text-white">
+      <button type="submit" class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600">
         <i class="fa-solid fa-arrow-up"></i>
       </button>
     </div>
   </form>
 </div>
+
 
 {% endblock %}

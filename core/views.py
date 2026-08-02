@@ -138,7 +138,8 @@ def send_message(request, id):
         return redirect("home")
 
     message = request.POST.get("message")
-    if message:
+    snap=request.FILES.get("image")
+    if message or snap:
 
-        Message.objects.create(sender=request.user, receiver=friend, text=message)
+        Message.objects.create(sender=request.user, receiver=friend, text=message,image=snap)
     return redirect("chat-details", id=id)
