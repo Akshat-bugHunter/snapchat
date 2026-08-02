@@ -58,9 +58,18 @@ def home(request):
 
 
 def chat_details_view(request, id):
-    friend=get_object_or_404(get_user_model(),pk=id)
+    friend = get_object_or_404(get_user_model(), pk=id)
+    messages = Message.objects.filter(
+        Q(sender=request.user, receiver=friend)
+        | Q(sender=friend, receiver=request.user)
+    ).order_by("created_at")
 
-    return render(request, "pages/chat-details.html",{"friend":friend})
+    if not are_friends(request.user, friend):
+        return redirect("home")
+
+    return render(
+        request, "pages/chat-details.html", {"friend": friend, "messages": messages}
+    )
 
 
 @login_required
@@ -109,3 +118,27 @@ def send_invite(request, id):
     except IntegrityError:
         return redirect("search-users")
     return redirect("search-users")
+
+
+def are_friends(user1, user2):
+    return (
+        FriendRequest.objects.filter(
+            Q(from_user=user1, to_user=user2) | Q(from_user=user2, to_user=user1)
+        )
+        .filter(status=FriendRequest.StatusChoice.ACCEPTED)
+        .exists()
+    )
+
+
+@require_http_methods(["POST"])
+def send_message(request, id):
+    friend = get_object_or_404(get_user_model(), pk=id)
+
+    if not are_friends(request.user, friend):
+        return redirect("home")
+
+    message = request.POST.get("message")
+    if message:
+
+        Message.objects.create(sender=request.user, receiver=friend, text=message)
+    return redirect("chat-details", id=id)

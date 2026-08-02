@@ -1,11 +1,10 @@
-{% extends 'base.html' %} {% block title %}Search{% endblock %} 
-{% block content %}
+{% extends 'base.html' %} {% block title %}Search{% endblock %} {% block content %}
+
 
 <div class="h-full flex flex-col bg-white">
   <!-- Header -->
-  <div
-    class="sticky top-0 z-20 h-20 bg-white border-b flex items-center px-4"
-  >
+
+  <div class="sticky top-0 z-20 h-20 bg-white border-b flex items-center px-4">
     <a
       href="{% url 'home' %}"
       class="size-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
@@ -13,20 +12,76 @@
       <i class="fa-solid fa-chevron-left text-black"></i>
     </a>
 
-        <div
-          class="flex items-center gap-3 ml-4"
-        >
-          <img
-            src="https://i.pravatar.cc/150?img=11"
-            class="w-12 h-12 rounded-full object-cover"
-          />
-          <span class="text-lg font-medium">{{friend.username}}</span>
-        </div>
+    <div class="flex items-center gap-3 ml-4">
+      <img
+        src="https://i.pravatar.cc/150?img=11"
+        class="w-12 h-12 rounded-full object-cover"
+      />
+      <span class="text-lg font-medium">{{friend.username}}</span>
+    </div>
+
+    <div class="flex flex-row ml-auto gap-4">
+      <i class="fa-solid fa-phone"></i>
+      <i class="fa-solid fa-video"></i>
+    </div>
   </div>
 
- 
+  <main
+    class="flex-1 overflow-y-auto px-4 py-4 left-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+  >
+    <div class="flex flex-col justify-end min-h-full space-y-3">
+      {% for message in messages %} {% if message.sender == request.user %}
+      <div class="chat chat-end">
+        <div class="chat-header text-xs text-gray-400 mb-1">
+          {{message.sender}} {% load humanize %}
+          <time class="text-xs opacity-50">
+            {{ message.created_at|naturaltime }}</time
+          >
+        </div>
 
+        <div class="chat-bubble bg-blue-600 text-white">{{message.text}}</div>
 
+        <div class="chat-footer text-[10px] opacity-50 mt-1">Seen</div>
+      </div>
+      {% else %}
+      <div class="chat chat-start">
+        <div class="chat-header">
+          {{message.sender}} {% load humanize %}
+          <time class="text-xs opacity-50">
+            {{ message.created_at|naturaltime }}</time
+          >
+        </div>
+
+        <div class="chat-bubble">{{message.text}}</div>
+
+        <div class="chat-footer opacity-50">Seen</div>
+      </div>
+      {% endif %} {% endfor %}
+    </div>
+  </main>
+
+  <form action="{% url 'send-message' friend.id %}"
+    method="POST"
+    class="sticky bottom-0 bg-white border-t border-gray-200 px-3 py-2"
+  >
+    {% csrf_token %}
+    <div class="flex items-center gap-2">
+      <button type="submit" class="text-2xl text-gray-600">
+        <i class="fa-solid fa-camera"></i>
+      </button>
+
+      <input
+        type="text"
+        name="message"
+        placeholder="Chat"
+        class="flex-1 h-9 bg-gray-100 rounded-full px-4 outline-none text-sm"
+      />
+
+      <button type="submit" class="w-8 h-8 rounded-full bg-blue-500 text-white">
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+    </div>
+  </form>
 </div>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register_view, login_view, home, search_view, send_invite,chat_details_view
+from .views import register_view, login_view, home, search_view, send_invite,chat_details_view,send_message
 
 urlpatterns = [
     path("register/", register_view, name="register-user"),
@@ -8,4 +8,5 @@ urlpatterns = [
     path("search/", search_view, name="search-users"),
     path("send-invite/<int:id>", send_invite, name="send-invite"),
     path("chat-details/<int:id>", chat_details_view, name="chat-details"),
+    path("send-message/<int:id>", send_message, name="send-message"),
 ]
