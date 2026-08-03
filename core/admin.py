@@ -1,7 +1,13 @@
 from django.contrib import admin
-from .models import Message,FriendRequest
+from django.contrib.auth.admin import UserAdmin
 
-# Register your models here.
+from .models import SnapUser, Message, FriendRequest
+
+
+@admin.register(SnapUser)
+class SnapUserAdmin(UserAdmin):
+    pass
+
 
 admin.site.register(Message)
 admin.site.register(FriendRequest)

@@ -18,31 +18,48 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    form = forms.RegisterForm(request.POST or None)
+    form = forms.RegisterForm(
+        request.POST or None,
+        request.FILES or None
+    )
+
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
         return redirect("home")
+
     return render(request, "accounts/register.html", {"form": form})
 
 
+# @require_http_methods(["GET", "POST"])
+# def login_view(request):
+#     if request.user.is_authenticated:
+#         return redirect("home")
+
+
+#     form = forms.LoginForm(request, data=request.POST or None)
+#     if request.method == "POST" and form.is_valid():
+#         login(request, form.get_user())
+#         return redirect("home")
+#     return render(request, "accounts/login.html", {"form": form})
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("home")
 
     form = forms.LoginForm(request, data=request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        login(request, form.get_user())
-        return redirect("home")
+
+    if request.method == "POST":
+
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("home")
+
     return render(request, "accounts/login.html", {"form": form})
 
 
-def logout_view(request):
-    logout(request)
-    return redirect("login")
-
-
+@login_required
 def home(request):
     queryset = FriendRequest.objects.filter(
         Q(from_user=request.user) | Q(to_user=request.user)
@@ -57,12 +74,17 @@ def home(request):
     return render(request, "pages/chat.html", {"friends": friends})
 
 
+@login_required
 def chat_details_view(request, id):
     friend = get_object_or_404(get_user_model(), pk=id)
     messages = Message.objects.filter(
         Q(sender=request.user, receiver=friend)
         | Q(sender=friend, receiver=request.user)
     ).order_by("created_at")
+
+    messages = list(messages)
+    received_messages = Message.objects.filter(receiver=request.user, sender=friend)
+    received_messages.delete()
 
     if not are_friends(request.user, friend):
         return redirect("home")
@@ -138,8 +160,10 @@ def send_message(request, id):
         return redirect("home")
 
     message = request.POST.get("message")
-    snap=request.FILES.get("image")
+    snap = request.FILES.get("image")
     if message or snap:
 
-        Message.objects.create(sender=request.user, receiver=friend, text=message,image=snap)
+        Message.objects.create(
+            sender=request.user, receiver=friend, text=message, image=snap
+        )
     return redirect("chat-details", id=id)

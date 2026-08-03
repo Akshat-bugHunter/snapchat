@@ -44,10 +44,14 @@
     <div class="h-dvh overflow-hidden bg-white sm:bg-neutral-950 flex justify-center items-center sm:p-6">
         <div
             class="relative w-full h-full min-h-0 overflow-hidden bg-white sm:w-auto sm:h-[min(812px,calc(100dvh-3rem))] sm:aspect-[450/845] sm:border-[2px] sm:border-neutral-800 sm:rounded-[1.75rem]">
-            <div class="relative w-full min-h-0 h-full overflow-hidden sm:rounded-[1.35rem]">
+            {% comment %} <div class="relative w-full min-h-0 h-full overflow-hidden sm:rounded-[1.35rem]">
                 {% block content %}
                 {% endblock %}
-            </div>
+            </div> {% endcomment %}
+            <div class="relative w-full min-h-0 h-full overflow-y-auto overflow-x-hidden sm:rounded-[1.35rem]">
+    {% block content %}
+    {% endblock %}
+</div>
         </div>
     </div>
     <script src="{% static 'index.js' %}"></script>
