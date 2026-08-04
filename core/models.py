@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 
 class SnapUser(AbstractUser):
-    avatar=models.ImageField(upload_to="avatar",default='media/default.jpg')
+    avatar=models.ImageField(upload_to="avatar",default='snaps/default.jpg')
 
 # Create your models here.
 class FriendRequest(models.Model):

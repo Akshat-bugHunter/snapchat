@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="h-full flex flex-col bg-white">
+
+    <!-- Header -->
+    <div class="absolute top-0 left-0 right-0 z-20 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+        <a href="{% url 'home' %}"
+           class="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition">
+            <i class="fa-solid fa-chevron-left text-lg"></i>
+        </a>
+
+        <h1 class="text-xl font-bold text-gray-900">
+            Friend Requests
+        </h1>
+    </div>
+
+    <!-- Content -->
+    <main class="mt-16 flex-1 overflow-y-auto">
+
+        {% for friend_request in friend_requests %}
+
+        <div class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition border-b border-gray-100">
+
+            <div class="flex items-center gap-3">
+
+                <!-- Avatar -->
+                {% if friend_request.from_user.avatar %}
+                    <img src="{{ friend_request.from_user.avatar.url }}"
+                         class="w-14 h-14 rounded-full object-cover border border-gray-200">
+                {% else %}
+                    <img src="/snap/default.jpg"
+                         class="w-14 h-14 rounded-full object-cover border border-gray-200">
+                {% endif %}
+
+                <!-- User Info -->
+                <div>
+                    <h2 class="font-semibold text-gray-900">
+                        {{ friend_request.from_user.username }}
+                    </h2>
+
+                    <p class="text-sm text-gray-500">
+                        Wants to add you as a friend
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Accept Button -->
+            <form action="{% url 'accept-friend' friend_request.id %}" method="POST">
+                {% csrf_token %}
+
+                <button
+                    class="bg-yellow-300 hover:bg-yellow-400 transition px-5 py-2 rounded-full font-semibold text-black shadow-sm">
+                    Accept
+                </button>
+            </form>
+
+        </div>
+
+        {% empty %}
+
+        <div class="h-full flex flex-col justify-center items-center text-center px-8 pt-24">
+
+            <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-5">
+                <i class="fa-solid fa-user-plus text-3xl text-gray-400"></i>
+            </div>
+
+            <h2 class="text-lg font-semibold">
+                No Friend Requests
+            </h2>
+
+            <p class="text-gray-500 mt-2">
+                You're all caught up. New friend requests will appear here.
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </main>
+
+</div>
+{% endblock %}

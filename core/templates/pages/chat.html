@@ -20,11 +20,11 @@
         <i class="fa-regular fa-bell"></i>
       </button>
 
-      <button
+      <a href="{% url 'friend-requests' %}"
         class="w-8 h-8 rounded-full bg-yellow-300 flex items-center justify-center"
       >
         <i class="fa-solid fa-user-plus text-black text-sm"></i>
-      </button>
+      </a>
 
       <button>
         <i class="fa-solid fa-ellipsis"></i>
@@ -45,7 +45,7 @@
           class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
         >
           <img
-            src="https://i.pravatar.cc/150?img=11"
+            src="{{ friend.avatar.url }}"
             class="w-14 h-14 rounded-full border-2 border-white"
           />
         </div>

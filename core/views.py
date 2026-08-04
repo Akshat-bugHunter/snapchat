@@ -167,3 +167,23 @@ def send_message(request, id):
             sender=request.user, receiver=friend, text=message, image=snap
         )
     return redirect("chat-details", id=id)
+
+
+@login_required
+@require_http_methods(["GET"])
+def friend_request_list_view(request):
+    friend_requests = FriendRequest.objects.filter(
+        status=FriendRequest.StatusChoice.PENDING, to_user=request.user
+    )
+    return render(
+        request, "pages/friend-request.html", {"friend_requests": friend_requests}
+    )
+
+@login_required
+@require_http_methods(["POST"])
+def accept_friend_request(request, id):
+    req = get_object_or_404(FriendRequest, pk=id)
+    if req.to_user == request.user and req.status == FriendRequest.StatusChoice.PENDING:
+        req.status = FriendRequest.StatusChoice.ACCEPTED
+        req.save()
+    return redirect("friend-requests")
