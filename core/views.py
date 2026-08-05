@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import login, logout, get_user_model
-
+import json
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-from .models import Message, FriendRequest
+from .models import Message, FriendRequest, SnapUser,Chat
 from . import forms
 
 from django.db import IntegrityError
@@ -18,10 +19,7 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect("home")
 
-    form = forms.RegisterForm(
-        request.POST or None,
-        request.FILES or None
-    )
+    form = forms.RegisterForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -162,8 +160,9 @@ def send_message(request, id):
     message = request.POST.get("message")
     snap = request.FILES.get("image")
     if message or snap:
+        chat=get_or_create_chat(request.user, friend)
 
-        Message.objects.create(
+        Message.objects.create(chat=chat,
             sender=request.user, receiver=friend, text=message, image=snap
         )
     return redirect("chat-details", id=id)
@@ -179,6 +178,7 @@ def friend_request_list_view(request):
         request, "pages/friend-request.html", {"friend_requests": friend_requests}
     )
 
+
 @login_required
 @require_http_methods(["POST"])
 def accept_friend_request(request, id):
@@ -187,3 +187,54 @@ def accept_friend_request(request, id):
         req.status = FriendRequest.StatusChoice.ACCEPTED
         req.save()
     return redirect("friend-requests")
+
+
+@login_required
+def map_view(request):
+
+    friends = SnapUser.objects.exclude(id=request.user.id)
+
+    friend_data = []
+
+    for friend in friends:
+
+        friend_data.append(
+            {
+                "username": friend.username,
+                "latitude": friend.latitude,
+                "longitude": friend.longitude,
+                "avatar": friend.avatar.url,
+            }
+        )
+
+    return render(request, "pages/map.html", {"friends": friend_data})
+
+
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_location(request):
+    data = json.loads(request.body)
+
+    request.user.latitude = data["latitude"]
+    request.user.longitude = data["longitude"]
+    request.user.save()
+
+    return JsonResponse({"success": True})
+
+
+def profile_view(request):
+    return render(request,"accounts/profile.html")
+
+@require_http_methods(["POST"])
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
+
+def get_or_create_chat(user1, user2):
+    if user1.id > user2.id:
+        user1, user2 = user2, user1
+    chat, created = Chat.objects.get_or_create(user1=user1, user2=user2)
+    return chat

@@ -4,9 +4,10 @@
 <div class="h-full flex flex-col">
   <div class="flex items-center justify-between px-4 py-4 border-b bg-white">
     <div class="flex items-center gap-5 text-xl">
-      <button>
-        <i class="fa-solid fa-user-group text-yellow-400"></i>
-      </button>
+<a href="{% url 'profile' %}"
+   class="w-12 h-12 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition">
+    <i class="fa-solid fa-circle-user text-3xl text-yellow-400"></i>
+</a>
 
       <a href="{% url 'search-users' %}">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -72,10 +73,10 @@
   <!-- Bottom Navigation -->
   <div class="border-t bg-black">
     <div class="flex justify-around py-3 ">
-      <button class="flex flex-col items-center text-gray-500 hover:text-white">
+      <a href="{% url 'map' %}" class="flex flex-col items-center text-gray-500 hover:text-white">
         <i class="fa-solid fa-location-dot text-xl"></i>
         <span class="text-xs">Map</span>
-      </button>
+      </a>
 
       <button class="flex flex-col items-center text-white">
         <i class="fa-solid fa-message text-xl"></i>

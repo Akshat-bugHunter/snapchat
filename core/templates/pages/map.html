@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
+
+<div
+id="map"
+style="height:700px;"
+></div>
+
+{{ friends|json_script:"friends-data" }}
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+const FRIENDS =
+JSON.parse(
+document.getElementById(
+"friends-data"
+).textContent
+);
+
+</script>
+
+<script src="{% static 'location.js' %}"></script>
+
+{% endblock %}

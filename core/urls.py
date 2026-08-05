@@ -1,5 +1,16 @@
 from django.urls import path
-from .views import register_view, login_view, home, search_view, send_invite,chat_details_view,send_message, friend_request_list_view, accept_friend_request
+from .views import (
+    register_view,
+    login_view,
+    home,
+    search_view,
+    send_invite,
+    chat_details_view,
+    send_message,
+    friend_request_list_view,
+    accept_friend_request,
+    map_view,update_location,profile_view,logout_view
+)
 
 urlpatterns = [
     path("register/", register_view, name="register-user"),
@@ -11,4 +22,8 @@ urlpatterns = [
     path("send-message/<int:id>", send_message, name="send-message"),
     path("friend-requests/", friend_request_list_view, name="friend-requests"),
     path("accept-friend-request/<int:id>", accept_friend_request, name="accept-friend"),
+    path("map/", map_view, name="map"),
+    path("update-location/", update_location, name="update-location"),
+     path("profile/", profile_view, name="profile"),
+    path("logout/", logout_view, name="logout"),
 ]
