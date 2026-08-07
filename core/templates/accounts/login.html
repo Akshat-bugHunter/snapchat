@@ -14,7 +14,7 @@
             Login to your account
         </p>
 
-        <form action="{% url 'login-user' %}" method="post" class="space-y-5">
+        <form action="{% url 'login' %}" method="post" class="space-y-5">
             {% csrf_token %}
 
             {% for field in form %}

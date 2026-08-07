@@ -1,100 +1,97 @@
-{% extends 'base.html' %} {% block title %}Search{% endblock %} 
-{% block content %}
+{% extends 'base.html' %} 
+{% block title %}Search Users{% endblock %} 
 
-<div class="h-full flex flex-col bg-white">
+{% block content %}
+<div class="min-h-screen flex flex-col bg-white">
   <!-- Header -->
-  <div
-    class="absolute top-0 left-0 right-0 z-20 px-3 py-3 bg-white border-b border-neutral-100 flex items-center gap-3"
-  >
+  <header class="sticky top-0 left-0 right-0 z-20 px-3 py-3 bg-white border-b border-neutral-100 flex items-center gap-3">
     <a
       href="{% url 'home' %}"
-      class="size-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+      class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
+      aria-label="Go back to Home"
     >
-      <i class="fa-solid fa-chevron-down text-black"></i>
+      <i class="fa-solid fa-chevron-left text-black"></i>
     </a>
 
     <form action="{% url 'search-users' %}" method="GET" class="flex-1">
-      <label
-        class="flex items-center gap-2 h-10 px-3 rounded-full bg-neutral-100"
-      >
+      <label class="flex items-center gap-2.5 h-10 px-3.5 rounded-full bg-neutral-100 focus-within:ring-2 focus-within:ring-black/5 transition">
         <i class="fa-solid fa-magnifying-glass text-neutral-400 text-sm"></i>
+        <input 
+          type="search" 
+          name="q" 
+          value="{{ request.GET.query|default:'' }}"
+          placeholder="Search username..." 
+          class="w-full bg-transparent text-sm text-black placeholder-neutral-400 outline-none"
+          autocomplete="off"
+        />
       </label>
     </form>
-  </div>
+  </header>
 
-  <!-- Users -->
-  <main class="mt-[64px] px-3 pb-8 overflow-y-auto">
+  <!-- Main Content / User List -->
+  <main class="flex-1 px-3 py-2 overflow-y-auto">
     <ul class="space-y-1">
       {% for user in users %}
+        <li class="flex items-center justify-between px-2 py-3 rounded-xl hover:bg-neutral-50 transition-colors">
+          <!-- Avatar + User Info -->
+          <div class="flex items-center gap-3 min-w-0 pr-2">
+            <div class="p-[2px] shrink-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400">
+              <img
+                src="{{ user.avatar.url }}"
+                alt="{{ user.username }}'s avatar"
+                class="w-12 h-12 rounded-full border-2 border-white object-cover"
+              />
+            </div>
 
-      <li
-        class="flex items-center justify-between px-2 py-3 rounded-xl hover:bg-neutral-50"
-      >
-        <div class="flex items-center gap-3 min-w-0">
-          <div
-            class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
-          >
-            <img
-              src="{{ user.avatar.url }}"
-              alt="{{ user.username }}"
-              class="w-14 h-14 rounded-full border-2 border-white"
-            />
+            <div class="min-w-0">
+              <h2 class="font-semibold text-base text-neutral-900 truncate leading-tight">
+                {{ user.get_full_name|default:user.username }}
+              </h2>
+              <p class="text-sm text-neutral-400 truncate">@{{ user.username }}</p>
+            </div>
           </div>
 
-          <div class="min-w-0">
-            <h2 class="font-semibold text-lg truncate">{{ user.username }}</h2>
+          <!-- Actions -->
+          <div class="shrink-0">
+            {% if user.id in sent %}
+              <button
+                type="button"
+                disabled
+                class="flex items-center gap-1.5 bg-neutral-200 text-neutral-700 text-xs font-semibold px-4 py-2 rounded-full cursor-not-allowed"
+              >
+                <i class="fa-solid fa-clock text-xs"></i>
+                <span>Pending</span>
+              </button>
 
-            <p class="text-sm text-gray-400">@{{ user.username }}</p>
+            {% elif user.id not in friends %}
+              <form method="post" action="{% url 'send-invite' user.id %}">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="flex items-center gap-1.5 bg-[#FFFC00] hover:bg-yellow-300 active:scale-95 text-black text-xs font-semibold px-4 py-2 rounded-full transition-all"
+                >
+                  <i class="fa-solid fa-user-plus text-xs"></i>
+                  <span>Add</span>
+                </button>
+              </form>
+            {% endif %}
           </div>
-        </div>
-
-        <div class="shrink-0">
-          {% if user.id in sent %}
-
-          <button
-            type="button"
-            class="min-w-[10px] flex items-center justify-center gap-1 bg-[#FFFC00] hover:bg-yellow-300 text-black text-sm font-semibold px-2 py-2 rounded-full transition"
-          >
-            <i class="fa-solid fa-clock"></i>
-
-            <span>Pending</span>
-          </button>
-
-          {% elif user.id not in friends %}
-          <form method="post" action="{% url 'send-invite' user.id %}">
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="min-w-[10px] flex items-center justify-center gap-1 bg-[#FFFC00] hover:bg-yellow-300 text-black text-sm font-semibold px-2 py-2 rounded-full transition"
-            >
-              <i class="fa-solid fa-user-plus text-xs"></i>
-              <span>Add</span>
-            </button>
-          </form>
-
-          {% endif %}
-        </div>
-      </li>
+        </li>
 
       {% empty %}
+        <!-- Empty State -->
+        <li class="flex flex-col items-center justify-center pt-20 text-center px-6">
+          <div class="w-14 h-14 rounded-full bg-neutral-100 flex items-center justify-center mb-3">
+            <i class="fa-solid fa-magnifying-glass text-neutral-400 text-lg"></i>
+          </div>
 
-      <div class="flex flex-col items-center pt-20 text-center px-8">
-        <div
-          class="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mb-3"
-        >
-          <i class="fa-solid fa-magnifying-glass text-neutral-400"></i>
-        </div>
-
-        <p class="font-semibold text-lg">Find your friends</p>
-
-        <p class="text-sm text-neutral-500 mt-1">
-          Search by username to send an invite
-        </p>
-      </div>
-
+          <p class="font-semibold text-base text-neutral-800">Find your friends</p>
+          <p class="text-sm text-neutral-500 mt-1 max-w-xs">
+            Search by username above to send an invite or connect.
+          </p>
+        </li>
       {% endfor %}
     </ul>
   </main>
 </div>
-
 {% endblock %}

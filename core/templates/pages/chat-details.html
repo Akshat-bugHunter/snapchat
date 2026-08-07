@@ -31,9 +31,10 @@
 
   <!-- Chat Messages -->
   <main
+    id="chat-messages"
     class="flex-1 overflow-y-auto px-4 py-4 left-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
   >
-    <div class="flex flex-col justify-end min-h-full space-y-3">
+    <div id="messages-list" class="flex flex-col justify-end min-h-full space-y-3">
       {% for message in messages %} 
         {% if message.sender == request.user %}
           
@@ -100,6 +101,7 @@
 
 
   <form 
+    id="chat-form"
     action="{% url 'send-message' friend.id %}"
     method="POST"
     enctype="multipart/form-data"
@@ -127,9 +129,11 @@
       <input id="snap-file" type="file" name="image" accept="image/*" class="hidden" />
 
       <input
+        id="message-input"
         type="text"
         name="message"
         placeholder="Chat"
+        autocomplete="off"
         class="flex-1 h-9 bg-gray-100 rounded-full px-4 outline-none text-sm focus:ring-1 focus:ring-blue-400"
       />
 
@@ -140,5 +144,106 @@
   </form>
 </div>
 
+<script>
+(function () {
+  const CHAT_ID = "{{ chat_id }}";         
+  const CURRENT_USER_ID = "{{ request.user.id }}";
+  const CURRENT_USERNAME = "{{ request.user.username }}";
+
+  const messagesList = document.getElementById("messages-list");
+  const messagesMain = document.getElementById("chat-messages");
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("message-input");
+  const fileInput = document.getElementById("snap-file");
+
+  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const socket = new WebSocket(`${wsProtocol}//${window.location.host}/ws/chat/${CHAT_ID}/`);
+
+  function scrollToBottom() {
+    messagesMain.scrollTop = messagesMain.scrollHeight;
+  }
+
+  function appendMessage({ sender_id, sender_username, message, created_at }) {
+    const isOutgoing = String(sender_id) === CURRENT_USER_ID;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = isOutgoing
+      ? "chat chat-end flex flex-col items-end"
+      : "chat chat-start flex flex-col items-start";
+
+    const header = document.createElement("div");
+    header.className = "chat-header text-xs text-gray-400 mb-1";
+    header.textContent = sender_username;
+
+    const time = document.createElement("time");
+    time.className = "text-xs opacity-50 ml-1";
+    time.textContent = "just now";
+    header.appendChild(time);
+
+    wrapper.appendChild(header);
+
+    if (message) {
+      const bubble = document.createElement("div");
+      bubble.className = isOutgoing
+        ? "chat-bubble bg-blue-600 text-white"
+        : "chat-bubble bg-gray-200 text-black";
+      const p = document.createElement("p");
+      p.textContent = message;
+      bubble.appendChild(p);
+      wrapper.appendChild(bubble);
+    }
+
+    messagesList.appendChild(wrapper);
+    scrollToBottom();
+  }
+
+  socket.addEventListener("open", () => {
+    console.log("Chat socket connected");
+  });
+
+  socket.addEventListener("message", (event) => {
+    const data = JSON.parse(event.data);
+    appendMessage({
+      sender_id: data.sender_id,
+      sender_username: data.sender_username,
+      message: data.message,
+      created_at: data.created_at,
+    });
+  });
+
+  socket.addEventListener("close", () => {
+    console.log("Chat socket disconnected");
+  });
+
+  socket.addEventListener("error", (err) => {
+    console.error("Chat socket error", err);
+  });
+
+  form.addEventListener("submit", (e) => {
+    
+    if (fileInput.files && fileInput.files.length > 0) {
+      return;
+    }
+
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (socket.readyState !== WebSocket.OPEN) {
+      console.warn("Socket not open, message not sent");
+      return;
+    }
+
+    socket.send(JSON.stringify({ message: text }));
+
+  
+    
+
+    input.value = "";
+  });
+
+  scrollToBottom();
+})();
+</script>
 
 {% endblock %}

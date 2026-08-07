@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
+    'channels',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'core',
@@ -67,7 +69,7 @@ TEMPLATES = [
         },
     },
 ]
-
+ASGI_APPLICATION = "snapchat.asgi.application"
 WSGI_APPLICATION = 'snapchat.wsgi.application'
 
 
@@ -122,3 +124,9 @@ MEDIA_URL="/media/"
 MEDIA_ROOT= BASE_DIR/"media"
 
 AUTH_USER_MODEL="core.SnapUser"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}

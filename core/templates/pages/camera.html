@@ -1,151 +1,231 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div
+  class="relative h-full w-full bg-black flex flex-col justify-between overflow-hidden select-none"
+>
+  <header
+    class="relative z-20 flex justify-between items-center px-4 pt-5 text-white"
+  >
+    <button
+      type="button"
+      onclick="goBack()"
+      aria-label="Go Back"
+      class="size-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 transition flex items-center justify-center backdrop-blur-md"
+    >
+      <i class="fa-solid fa-chevron-down text-lg"></i>
+    </button>
 
-{% block content %}
-<div class="relative h-full w-full bg-black flex flex-col justify-between overflow-hidden select-none">
-    
-    
-    <header class="relative z-20 flex justify-between items-center px-4 pt-5 text-white">
-        <button type="button" onclick="goBack()" aria-label="Go Back"
-            class="size-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 transition flex items-center justify-center backdrop-blur-md">
-            <i class="fa-solid fa-chevron-down text-lg"></i>
-        </button>
-
-        <div class="flex items-center gap-3">
-            <button type="button" id="toggle-flash" aria-label="Toggle Flash"
-                class="size-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 transition flex items-center justify-center backdrop-blur-md">
-                <i class="fa-solid fa-bolt text-lg"></i>
-            </button>
-            <button type="button" id="flip-camera" aria-label="Flip Camera"
-                class="size-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 transition flex items-center justify-center backdrop-blur-md">
-                <i class="fa-solid fa-rotate text-lg"></i>
-            </button>
-        </div>
-    </header>
-
-  
-    <main id="camera-container" class="absolute inset-0 z-0 bg-neutral-900">
-        <video id="video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-    </main>
-
-  
-    <canvas id="canvas" class="hidden"></canvas>
-
-    
-    <div id="capture-bar" class="absolute bottom-12 left-0 right-0 z-20 flex justify-center items-center transition-opacity duration-200">
-        <button type="button" id="capture" aria-label="Take Photo"
-            class="size-20 rounded-full border-[5px] border-[#FFFC00] active:scale-90 transition-transform flex items-center justify-center p-0 bg-transparent focus:outline-none">
-            <span class="block size-14 rounded-full bg-white pointer-events-none"></span>
-        </button>
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        id="toggle-flash"
+        aria-label="Toggle Flash"
+        class="size-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 transition flex items-center justify-center backdrop-blur-md"
+      >
+        <i class="fa-solid fa-bolt text-lg"></i>
+      </button>
+      <button
+        type="button"
+        id="flip-camera"
+        aria-label="Flip Camera"
+        class="size-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 transition flex items-center justify-center backdrop-blur-md"
+      >
+        <i class="fa-solid fa-rotate text-lg"></i>
+      </button>
     </div>
+  </header>
 
+  <main id="camera-container" class="absolute inset-0 z-0 bg-neutral-900">
+    <video
+      id="video"
+      autoplay
+      playsinline
+      muted
+      class="w-full h-full object-cover"
+    ></video>
+  </main>
 
-    <div id="preview-actions" class="hidden absolute bottom-12 left-0 right-0 z-20 flex items-center justify-between px-6 transition-opacity duration-200">
-        <button type="button" id="retake" aria-label="Retake Photo"
-            class="size-12 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-md active:scale-95 transition">
-            <i class="fa-solid fa-rotate-left text-lg"></i>
-        </button>
+  <canvas id="canvas" class="hidden"></canvas>
 
-        {% if selected_friend_id %}
-        <button type="submit" form="send-snap-form" id="send-direct"
-            class="h-12 px-6 rounded-full bg-[#FFFC00] hover:bg-[#ebd800] active:scale-95 text-black font-bold flex items-center gap-2 shadow-lg transition">
-            <span>Send</span>
-            <i class="fa-solid fa-paper-plane text-sm"></i>
-        </button>
-        {% else %}
-        <button type="button" id="open-send-to"
-            class="h-12 px-6 rounded-full bg-[#FFFC00] hover:bg-[#ebd800] active:scale-95 text-black font-bold flex items-center gap-2 shadow-lg transition">
-            <span>Send To</span>
-            <i class="fa-solid fa-paper-plane text-sm"></i>
-        </button>
-        {% endif %}
-    </div>
+  <div
+    id="capture-bar"
+    class="absolute bottom-12 left-0 right-0 z-20 flex justify-center items-center transition-opacity duration-200"
+  >
+    <button
+      type="button"
+      id="capture"
+      aria-label="Take Photo"
+      class="size-20 rounded-full border-[5px] border-[#FFFC00] active:scale-90 transition-transform flex items-center justify-center p-0 bg-transparent focus:outline-none"
+    >
+      <span
+        class="block size-14 rounded-full bg-white pointer-events-none"
+      ></span>
+    </button>
+  </div>
 
+  <div
+    id="preview-actions"
+    class="hidden absolute bottom-12 left-0 right-0 z-20 flex items-center justify-between px-6 transition-opacity duration-200"
+  >
+    <button
+      type="button"
+      id="retake"
+      aria-label="Retake Photo"
+      class="size-12 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-md active:scale-95 transition"
+    >
+      <i class="fa-solid fa-rotate-left text-lg"></i>
+    </button>
 
-    <form id="send-snap-form" action="{% url 'send-snap' %}" method="post" class="hidden">
-        {% csrf_token %}
-        <input type="hidden" name="image_data" id="image-data" value="">
-        {% if selected_friend_id %}
-        <input type="hidden" name="friend_ids" value="{{ selected_friend_id }}">
-        {% endif %}
-    </form>
-
-  
-    {% if not selected_friend_id %}
-    <div id="send-to-sheet" class="hidden absolute inset-0 z-30 bg-black/60 backdrop-blur-xs flex flex-col justify-end transition-opacity duration-300">
-        <div id="sheet-content" class="bg-[#1c1c1e] rounded-t-[28px] max-h-[82vh] flex flex-col text-white overflow-hidden transform translate-y-full transition-transform duration-300 ease-out">
-            
-         
-            <div class="flex justify-center pt-3 pb-1">
-                <div class="w-10 h-1 rounded-full bg-white/20"></div>
-            </div>
-
-       
-            <div class="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-                <div id="snap-thumb" class="size-14 rounded-xl overflow-hidden bg-neutral-800 shrink-0 ring-2 ring-[#FFFC00]"></div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-white">New Snap</p>
-                    <p class="text-xs text-white/50 mt-0.5">Select recipients</p>
-                </div>
-                <button type="button" id="close-send-to" aria-label="Close"
-                    class="size-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-
-     
-            <div class="flex flex-col flex-1 min-h-0">
-                <div class="overflow-y-auto px-3 flex-1 scrollbar-thin">
-                    {% if friends %}
-                    <p class="text-[11px] font-bold tracking-wider text-white/40 uppercase px-2 pt-3 pb-1">Friends</p>
-                    <ul class="space-y-1 pb-2">
-                        {% for friend in friends %}
-                        <li>
-                            <label class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/5 active:bg-white/10 cursor-pointer transition">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="relative shrink-0">
-                                        <div class="size-11 rounded-full overflow-hidden bg-neutral-700 ring-2 ring-violet-500/80">
-                                            <img src="{{ friend.avatar.url }}" alt="{{ friend.username }}" loading="lazy" decoding="async" class="object-cover size-full">
-                                        </div>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-white truncate">{{ friend.username }}</p>
-                                        <p class="text-xs text-white/40">Tap to select</p>
-                                    </div>
-                                </div>
-                                <input type="checkbox" name="friend_ids" value="{{ friend.id }}" form="send-snap-form"
-                                    class="friend-check checkbox checkbox-sm border-white/30 checked:bg-[#FFFC00] checked:text-black checked:border-[#FFFC00] transition">
-                            </label>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-              
-                    <div class="flex flex-col items-center justify-center pt-12 pb-10 text-center px-6">
-                        <div class="size-14 rounded-full bg-white/10 flex items-center justify-center mb-3">
-                            <i class="fa-solid fa-user-plus text-xl text-white/60"></i>
-                        </div>
-                        <p class="text-sm font-semibold text-white">No friends found</p>
-                        <p class="text-xs text-white/40 mt-1">Add friends to start sending snaps</p>
-                        <a href="{% url 'search-users' %}"
-                            class="mt-5 rounded-full border-0 bg-[#FFFC00] hover:bg-[#ebd800] text-black font-bold px-6 py-2.5 text-xs shadow-md transition">
-                            Find Friends
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-
-                
-                <div class="p-4 border-t border-white/10 bg-[#1c1c1e]">
-                    <button type="submit" form="send-snap-form" id="send-snap-btn"
-                        class="w-full rounded-full border-0 bg-[#FFFC00] hover:bg-[#ebd800] text-black font-bold h-12 flex items-center justify-center transition disabled:opacity-50 disabled:pointer-events-none">
-                        Send Snap
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% if selected_friend_id %}
+    <button
+      type="submit"
+      form="send-snap-form"
+      id="send-direct"
+      class="h-12 px-6 rounded-full bg-[#FFFC00] hover:bg-[#ebd800] active:scale-95 text-black font-bold flex items-center gap-2 shadow-lg transition"
+    >
+      <span>Send</span>
+      <i class="fa-solid fa-paper-plane text-sm"></i>
+    </button>
+    {% else %}
+    <button
+      type="button"
+      id="open-send-to"
+      class="h-12 px-6 rounded-full bg-[#FFFC00] hover:bg-[#ebd800] active:scale-95 text-black font-bold flex items-center gap-2 shadow-lg transition"
+    >
+      <span>Send To</span>
+      <i class="fa-solid fa-paper-plane text-sm"></i>
+    </button>
     {% endif %}
+  </div>
+
+  <form
+    id="send-snap-form"
+    action="{% url 'send-snap' %}"
+    method="post"
+    class="hidden"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="image_data" id="image-data" value="" />
+    {% if selected_friend_id %}
+    <input type="hidden" name="friend_ids" value="{{ selected_friend_id }}" />
+    {% endif %}
+  </form>
+
+  {% if not selected_friend_id %}
+  <div
+    id="send-to-sheet"
+    class="hidden absolute inset-0 z-30 bg-black/60 backdrop-blur-xs flex flex-col justify-end transition-opacity duration-300"
+  >
+    <div
+      id="sheet-content"
+      class="bg-[#1c1c1e] rounded-t-[28px] max-h-[82vh] flex flex-col text-white overflow-hidden transform translate-y-full transition-transform duration-300 ease-out"
+    >
+      <div class="flex justify-center pt-3 pb-1">
+        <div class="w-10 h-1 rounded-full bg-white/20"></div>
+      </div>
+
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+        <div
+          id="snap-thumb"
+          class="size-14 rounded-xl overflow-hidden bg-neutral-800 shrink-0 ring-2 ring-[#FFFC00]"
+        ></div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-white">New Snap</p>
+          <p class="text-xs text-white/50 mt-0.5">Select recipients</p>
+        </div>
+        <button
+          type="button"
+          id="close-send-to"
+          aria-label="Close"
+          class="size-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+        >
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="flex flex-col flex-1 min-h-0">
+        <div class="overflow-y-auto px-3 flex-1 scrollbar-thin">
+          {% if friends %}
+          <p
+            class="text-[11px] font-bold tracking-wider text-white/40 uppercase px-2 pt-3 pb-1"
+          >
+            Friends
+          </p>
+          <ul class="space-y-1 pb-2">
+            {% for friend in friends %}
+            <li>
+              <label
+                class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/5 active:bg-white/10 cursor-pointer transition"
+              >
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="relative shrink-0">
+                    <div
+                      class="size-11 rounded-full overflow-hidden bg-neutral-700 ring-2 ring-violet-500/80"
+                    >
+                      <img
+                        src="{{ friend.avatar.url }}"
+                        alt="{{ friend.username }}"
+                        loading="lazy"
+                        decoding="async"
+                        class="object-cover size-full"
+                      />
+                    </div>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-white truncate">
+                      {{ friend.username }}
+                    </p>
+                    <p class="text-xs text-white/40">Tap to select</p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  name="friend_ids"
+                  value="{{ friend.id }}"
+                  form="send-snap-form"
+                  class="friend-check checkbox checkbox-sm border-white/30 checked:bg-[#FFFC00] checked:text-black checked:border-[#FFFC00] transition"
+                />
+              </label>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+
+          <div
+            class="flex flex-col items-center justify-center pt-12 pb-10 text-center px-6"
+          >
+            <div
+              class="size-14 rounded-full bg-white/10 flex items-center justify-center mb-3"
+            >
+              <i class="fa-solid fa-user-plus text-xl text-white/60"></i>
+            </div>
+            <p class="text-sm font-semibold text-white">No friends found</p>
+            <p class="text-xs text-white/40 mt-1">
+              Add friends to start sending snaps
+            </p>
+            <a
+              href="{% url 'search-users' %}"
+              class="mt-5 rounded-full border-0 bg-[#FFFC00] hover:bg-[#ebd800] text-black font-bold px-6 py-2.5 text-xs shadow-md transition"
+            >
+              Find Friends
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="p-4 border-t border-white/10 bg-[#1c1c1e]">
+          <button
+            type="submit"
+            form="send-snap-form"
+            id="send-snap-btn"
+            class="w-full rounded-full border-0 bg-[#FFFC00] hover:bg-[#ebd800] text-black font-bold h-12 flex items-center justify-center transition disabled:opacity-50 disabled:pointer-events-none"
+          >
+            Send Snap
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <script src="{% static 'camera.js' %}"></script>
