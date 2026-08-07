@@ -1,98 +1,121 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+{% block content %}
 
-<!-- Header -->
-<div class="h-full flex flex-col">
-  <div class="flex items-center justify-between px-4 py-4 border-b bg-white">
-    <div class="flex items-center gap-5 text-xl">
-<a href="{% url 'profile' %}"
-   class="w-12 h-12 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition">
-    <i class="fa-solid fa-circle-user text-3xl text-yellow-400"></i>
-</a>
-
-      <a href="{% url 'search-users' %}">
-        <i class="fa-solid fa-magnifying-glass"></i>
+<div class="h-full flex flex-col bg-white">
+  <!-- Header -->
+  <header class="flex items-center justify-between px-4 py-2.5 border-b bg-white sticky top-0 z-10">
+    <!-- Left Actions -->
+    <div class="flex items-center gap-2">
+      <a href="{% url 'profile' %}" class="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition" aria-label="Profile">
+        <i class="fa-solid fa-circle-user text-xl text-yellow-400"></i>
+      </a>
+      <a href="{% url 'search-users' %}" class="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-gray-700 transition" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass text-sm"></i>
       </a>
     </div>
 
-    <h1 class="text-xl font-semibold">Chat</h1>
 
-    <div class="flex items-center gap-5 text-xl">
-      <button>
-        <i class="fa-regular fa-bell"></i>
+    <h1 class="text-lg font-bold text-gray-900 tracking-tight">Chat</h1>
+
+  
+    <div class="flex items-center gap-2">
+      <button type="button" class="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-gray-700 transition" aria-label="Notifications">
+        <i class="fa-regular fa-bell text-base"></i>
       </button>
 
-      <a href="{% url 'friend-requests' %}"
-        class="w-8 h-8 rounded-full bg-yellow-300 flex items-center justify-center"
-      >
-        <i class="fa-solid fa-user-plus text-black text-sm"></i>
+      <a href="{% url 'friend-requests' %}" class="w-9 h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 flex items-center justify-center transition" aria-label="Add Friend">
+        <i class="fa-solid fa-user-plus text-black text-xs"></i>
       </a>
 
-      <button>
-        <i class="fa-solid fa-ellipsis"></i>
+      <button type="button" class="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-gray-700 transition" aria-label="More options">
+        <i class="fa-solid fa-ellipsis text-base"></i>
       </button>
     </div>
-  </div>
+  </header>
 
   <!-- Chat List -->
- <div class="flex-1 overflow-y-auto">
-  {% for friend in friends %}
+  <div class="flex-1 overflow-y-auto divide-y divide-gray-100">
+    {% for friend, chat, last_message in chats %}
+      <a href="{% url 'chat-details' chat.id %}" class="block">
+        <div class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-3 min-w-0">
+        
+            <div class="p-[2px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 shrink-0">
+              {% if friend.avatar %}
+                <img src="{{ friend.avatar.url }}" alt="{{ friend.username }}" class="w-12 h-12 rounded-full border-2 border-white object-cover">
+              {% else %}
+                <div class="w-12 h-12 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center">
+                  <i class="fa-solid fa-user text-gray-400"></i>
+                </div>
+              {% endif %}
+            </div>
 
-  <a href="{% url 'chat-details' friend.id  %}">
-    <div
-      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
-    >
-      <div class="flex items-center gap-3">
-        <div
-          class="p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400"
-        >
-          <img
-            src="{{ friend.avatar.url }}"
-            class="w-14 h-14 rounded-full border-2 border-white"
-          />
+            <!-- Chat Info -->
+            <div class="min-w-0">
+              <h2 class="font-bold text-gray-900 text-base truncate">
+                {{ friend.username }}
+              </h2>
+
+              <div class="flex items-center gap-2 mt-0.5">
+                <p class="flex items-center gap-1 text-sm text-gray-500 truncate">
+                  <i class="fa-regular fa-message text-blue-500 text-xs shrink-0"></i>
+                  <span class="truncate">{{ last_message|truncatechars:10|default:"New chat" }}</span>
+                </p>
+
+                {% comment %} <div class="flex items-center gap-0.5 text-xs font-semibold text-orange-500 shrink-0 bg-orange-50 px-1.5 py-0.5 rounded-full">
+                  <span>{{ chat.streak|default:"0" }}</span>
+                  <i class="fa-solid fa-fire text-orange-500"></i>
+                </div> {% endcomment %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Camera Action -->
+          <button type="button" class="p-2 text-gray-400 hover:text-gray-600 transition shrink-0">
+            <span>{{ chat.streak|default:"0" }}</span>
+                  <i class="fa-solid fa-fire text-orange-500"></i>
+          </button>
         </div>
-
-        <div>
-          <h2 class="font-bold text-lg">{{ friend.username }}</h2>
-
-          <p class="flex items-center gap-1 text-sm text-gray-400">
-            <i class="fa-regular fa-message text-blue-500 text-xs"></i>
-
-            Received • 1m
-          </p>
+      </a>
+    {% empty %}
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center h-64 text-center px-4">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3 text-gray-400">
+          <i class="fa-regular fa-comments text-2xl"></i>
         </div>
+        <p class="text-gray-600 font-medium">No chats yet</p>
+        <p class="text-gray-400 text-sm mt-1">Start a conversation by adding or searching for friends!</p>
+        <a href="{% url 'search-users' %}" class="mt-4 px-4 py-2 bg-yellow-400 font-semibold text-black rounded-full text-sm hover:bg-yellow-500 transition">
+          Find Friends
+        </a>
       </div>
+    {% endfor %}
+  </div>
 
-      <button class="text-gray-500">
-        <i class="fa-solid fa-camera text-xl"></i>
-      </button>
-    </div>
-  </a>
-  {% endfor %}
-</div>
-  
   <!-- Bottom Navigation -->
   <div class="border-t bg-black">
-    <div class="flex justify-around py-3 ">
-      <a href="{% url 'map' %}" class="flex flex-col items-center text-gray-500 hover:text-white">
+    <div class="flex justify-around py-3">
+      <a href="{% url 'map' %}" class="flex flex-col items-center text-gray-400 hover:text-white transition">
         <i class="fa-solid fa-location-dot text-xl"></i>
-        <span class="text-xs">Map</span>
+        <span class="text-[10px] mt-1">Map</span>
       </a>
 
-      <button class="flex flex-col items-center text-white">
+      <button type="button" class="flex flex-col items-center text-white">
         <i class="fa-solid fa-message text-xl"></i>
-        <span class="text-xs font-semibold">Chat</span>
+        <span class="text-[10px] font-semibold mt-1">Chat</span>
       </button>
 
-      <button class="flex flex-col items-center text-gray-500 hover:text-white">
+      <a href="{% url 'camera' %}" type="button" class="flex flex-col items-center text-gray-400 hover:text-white transition">
         <i class="fa-solid fa-camera text-xl"></i>
-        <span class="text-xs">Camera</span>
-      </button>
+        <span class="text-[10px] mt-1">Camera</span>
+      </a>
 
-      <button class="flex flex-col items-center text-gray-500 hover:text-white">
+      <button type="button" class="flex flex-col items-center text-gray-400 hover:text-white transition">
         <i class="fa-solid fa-user-group text-xl"></i>
-        <span class="text-xs">Stories</span>
+        <span class="text-[10px] mt-1">Stories</span>
       </button>
     </div>
   </div>
 </div>
+
 {% endblock %}

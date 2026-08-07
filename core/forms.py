@@ -47,3 +47,7 @@ class LoginForm(AuthenticationForm):
             field.widget.attrs.update({
                 "class": "w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500",
             })
+
+class LocationForm(forms.forms.Form):
+    longitude = forms.DecimalField(max_digits=12, decimal_places=8)
+    latitude = forms.DecimalField(max_digits=12, decimal_places=8)

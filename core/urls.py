@@ -9,7 +9,12 @@ from .views import (
     send_message,
     friend_request_list_view,
     accept_friend_request,
-    map_view,update_location,profile_view,logout_view
+    map_view,
+    update_location,
+    profile_view,
+    logout_view,
+    camera_view,
+    send_snap_view,
 )
 
 urlpatterns = [
@@ -24,6 +29,8 @@ urlpatterns = [
     path("accept-friend-request/<int:id>", accept_friend_request, name="accept-friend"),
     path("map/", map_view, name="map"),
     path("update-location/", update_location, name="update-location"),
-     path("profile/", profile_view, name="profile"),
+    path("profile/", profile_view, name="profile"),
     path("logout/", logout_view, name="logout"),
+    path("camera/", camera_view, name="camera"),
+    path("send-snap/", send_snap_view, name="send-snap"),
 ]

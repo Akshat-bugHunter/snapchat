@@ -2,13 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import login, logout, get_user_model
 import json
+from django.core.files.base import ContentFile
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-
-from .models import Message, FriendRequest, SnapUser,Chat
+from typing import List
+from django.utils import timezone
+from .models import Message, FriendRequest, SnapUser, Chat
 from . import forms
-
+import base64
+from .utils import are_friends, get_friends, get_or_create_chat, update_streak
 from django.db import IntegrityError
 
 # Create your views here.
@@ -59,36 +62,64 @@ def login_view(request):
 
 @login_required
 def home(request):
-    queryset = FriendRequest.objects.filter(
-        Q(from_user=request.user) | Q(to_user=request.user)
-    )
-    friend_requests = queryset.filter(status=FriendRequest.StatusChoice.ACCEPTED)
-    friends = []
-    for friend in friend_requests:
-        if request.user == friend.from_user:
-            friends.append(friend.to_user)
+    friends = get_friends(request.user)
+    locationform = forms.LocationForm()
+
+    chat_list = []
+
+    for friend in friends:
+        chat = get_or_create_chat(request.user, friend)
+
+        message = chat.messages.order_by("-created_at").first()
+
+        if message is None:
+            last_message = "Say Hi"
+        elif message.image:
+            last_message = "New Snap"
         else:
-            friends.append(friend.from_user)
-    return render(request, "pages/chat.html", {"friends": friends})
+            last_message = message.text
+
+        chat_list.append((friend, chat, last_message))
+
+    chat_list.sort(key=lambda row: row[1].last_message, reverse=True)
+
+    return render(
+        request,
+        "pages/chat.html",
+        {
+            "chats": chat_list,
+            "locationform": locationform,
+        },
+    )
 
 
 @login_required
 def chat_details_view(request, id):
-    friend = get_object_or_404(get_user_model(), pk=id)
-    messages = Message.objects.filter(
-        Q(sender=request.user, receiver=friend)
-        | Q(sender=friend, receiver=request.user)
-    ).order_by("created_at")
+    chat = get_object_or_404(Chat, pk=id)
+    messages = chat.messages.all().order_by("created_at")
+    update_streak(chat)
 
-    messages = list(messages)
-    received_messages = Message.objects.filter(receiver=request.user, sender=friend)
-    received_messages.delete()
+    friend = chat.user1
+    if chat.user1 == request.user:
+        friend = chat.user2
 
-    if not are_friends(request.user, friend):
-        return redirect("home")
+    if chat.mode == chat.Mode.ON_CLOSE:
+        Message.objects.filter(chat=chat, receiver=request.user, sender=friend).delete()
+
+    elif chat.mode == chat.Mode.AFTER_24HR:
+        now = timezone.now()
+        grace_period = now() - timezone.timedelta(days=1)
+        messages = messages.filter(created_at__gte=grace_period)
 
     return render(
-        request, "pages/chat-details.html", {"friend": friend, "messages": messages}
+        request,
+        "pages/chat-details.html",
+        {
+            "friend": friend,
+            "messages": messages,
+            "chat_id": id,
+            "chat": chat,
+        },
     )
 
 
@@ -140,16 +171,6 @@ def send_invite(request, id):
     return redirect("search-users")
 
 
-def are_friends(user1, user2):
-    return (
-        FriendRequest.objects.filter(
-            Q(from_user=user1, to_user=user2) | Q(from_user=user2, to_user=user1)
-        )
-        .filter(status=FriendRequest.StatusChoice.ACCEPTED)
-        .exists()
-    )
-
-
 @require_http_methods(["POST"])
 def send_message(request, id):
     friend = get_object_or_404(get_user_model(), pk=id)
@@ -160,12 +181,13 @@ def send_message(request, id):
     message = request.POST.get("message")
     snap = request.FILES.get("image")
     if message or snap:
-        chat=get_or_create_chat(request.user, friend)
+        chat = get_or_create_chat(request.user, friend)
 
-        Message.objects.create(chat=chat,
-            sender=request.user, receiver=friend, text=message, image=snap
+        Message.objects.create(
+            chat=chat, sender=request.user, receiver=friend, text=message, image=snap
         )
-    return redirect("chat-details", id=id)
+        update_streak(chat)
+    return redirect("chat-details", id=chat.id)
 
 
 @login_required
@@ -210,8 +232,6 @@ def map_view(request):
     return render(request, "pages/map.html", {"friends": friend_data})
 
 
-
-
 @login_required
 @require_http_methods(["POST"])
 def update_location(request):
@@ -225,7 +245,8 @@ def update_location(request):
 
 
 def profile_view(request):
-    return render(request,"accounts/profile.html")
+    return render(request, "accounts/profile.html")
+
 
 @require_http_methods(["POST"])
 def logout_view(request):
@@ -233,8 +254,52 @@ def logout_view(request):
     return redirect("login")
 
 
-def get_or_create_chat(user1, user2):
-    if user1.id > user2.id:
-        user1, user2 = user2, user1
-    chat, created = Chat.objects.get_or_create(user1=user1, user2=user2)
-    return chat
+@login_required
+def camera_view(request):
+    friends = get_friends(request.user)
+    selected_friend_id = request.GET.get("friend")
+
+    try:
+        selected_friend_id = int(selected_friend_id) if selected_friend_id else None
+    except (TypeError, ValueError):
+        selected_friend_id = None
+
+    return render(
+        request,
+        "pages/camera.html",
+        {"friends": friends, "selected_friend_id": selected_friend_id},
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
+def send_snap_view(request):
+    image_data = request.POST.get("image_data")
+    friend_ids = request.POST.getlist("friend_ids")
+
+    if not image_data or not friend_ids:
+        return redirect("camera")
+
+    image_text = image_data.split(",")[1]
+    image_bytes = base64.b64decode(image_text)
+
+    for friend_id in friend_ids:
+        friend = get_object_or_404(get_user_model(), pk=friend_id)
+        if not are_friends(request.user, friend):
+
+            continue
+
+        chat = get_or_create_chat(request.user, friend)
+        Message.objects.create(
+            chat=chat,
+            sender=request.user,
+            receiver=friend,
+            image=ContentFile(image_bytes, name="snap.jpg"),
+        )
+        chat.last_message = timezone.now()
+        chat.save()
+        update_streak(chat=chat)
+        last_chat = chat
+        if last_chat and len(friend_ids) == 1:
+            return redirect("chat-details", id=last_chat.id)
+    return redirect("home")

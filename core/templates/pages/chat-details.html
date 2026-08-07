@@ -39,13 +39,13 @@
           
           <!-- Outgoing Message (Sender) -->
           <div class="chat chat-end flex flex-col items-end">
-            <!-- 1. Header is placed on TOP -->
+  
             <div class="chat-header text-xs text-gray-400 mb-1">
               {{ message.sender }} 
               <time class="text-xs opacity-50">{{ message.created_at|naturaltime }}</time>
             </div>
 
-            <!-- 2. Image goes BELOW Header -->
+          
             {% if message.image %}
               <div class="mb-1">
                 <img 
@@ -56,7 +56,7 @@
               </div>
             {% endif %}
 
-            <!-- 3. Text Bubble ONLY for Text -->
+          
             {% if message.text %}
               <div class="chat-bubble bg-blue-600 text-white">
                 <p>{{ message.text }}</p>
@@ -68,13 +68,13 @@
 
           <!-- Incoming Message -->
           <div class="chat chat-start flex flex-col items-start">
-            <!-- 1. Header is placed on TOP -->
+            
             <div class="chat-header text-xs text-gray-400 mb-1">
               {{ message.sender }} 
               <time class="text-xs opacity-50">{{ message.created_at|naturaltime }}</time>
             </div>
 
-            <!-- 2. Image goes BELOW Header -->
+            
             {% if message.image %}
               <div class="mb-1">
                 <img 
@@ -85,7 +85,7 @@
               </div>
             {% endif %}
 
-            <!-- 3. Text Bubble ONLY for Text -->
+            
             {% if message.text %}
               <div class="chat-bubble bg-gray-200 text-black">
                 <p>{{ message.text }}</p>
@@ -98,7 +98,7 @@
     </div>
   </main>
 
-  <!-- Input Form -->
+
   <form 
     action="{% url 'send-message' friend.id %}"
     method="POST"
@@ -107,7 +107,7 @@
   >
     {% csrf_token %}
     
-    <!-- Image Preview Container -->
+   
     <div id="preview-container" class="hidden relative w-16 h-16 border rounded-lg overflow-hidden group">
       <img id="preview" alt="Preview" class="w-full h-full object-cover" />
       <button 
